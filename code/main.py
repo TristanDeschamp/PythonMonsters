@@ -7,8 +7,10 @@ from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, Co
 from entities import Player, Character
 from groups import AllSprites
 from dialog import DialogTree
+from monster_index import MonsterIndex
 
 from support import *
+from monsters import Monster
 
 class Game:
 	# General
@@ -17,6 +19,18 @@ class Game:
 		self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 		pygame.display.set_caption('PythonMonsters')
 		self.clock = pygame.time.Clock()
+
+		# Player Monsters
+		self.player_monsters = {
+			0: Monster('Charmadillo', 30),
+			1: Monster('Friolera', 29),
+			2: Monster('Larvea', 3),
+			3: Monster('Atrox', 24),
+			4: Monster('Sparchu', 24),
+			5: Monster('Gulfin', 24),
+			6: Monster('Jacana', 2),
+			7: Monster('Pouch', 3),
+		}
 
 		# Groups
 		self.all_sprites = AllSprites()
@@ -35,7 +49,10 @@ class Game:
 		self.import_assets()
 		self.setup(self.tmx_maps['world'], 'house')
 
+		# Overlays
 		self.dialog_tree = None
+		self.monster_index = MonsterIndex(self.player_monsters, self.fonts, self.monster_frames)
+		self.index_open = False
 
 	def import_assets(self):
 		self.tmx_maps = tmx_importer('..', 'data', 'maps')
@@ -46,8 +63,16 @@ class Game:
 			'characters': all_character_import('..', 'graphics', 'characters'),
 		}
 
+		self.monster_frames = {
+			'icons': import_folder_dict('..', 'graphics', 'icons')
+		}
+		print(self.monster_frames['icons'])
+
 		self.fonts = {
-			'dialog': pygame.font.Font(join('..', 'graphics', 'fonts', 'PixeloidSans.ttf'), 30)
+			'dialog': pygame.font.Font(join('..', 'graphics', 'fonts', 'PixeloidSans.ttf'), 30),
+			'regular': pygame.font.Font(join('..', 'graphics', 'fonts', 'PixeloidSans.ttf'), 18),
+			'small': pygame.font.Font(join('..', 'graphics', 'fonts', 'PixeloidSans.ttf'), 14),
+			'bold': pygame.font.Font(join('..', 'graphics', 'fonts', 'dogicapixelbold.otf'), 20),
 		}
 
 	def setup(self, tmx_map, player_start_pos):
@@ -125,6 +150,10 @@ class Game:
 						self.create_dialog(character)
 						character.can_rotate = False
 
+			if keys[pygame.K_RETURN]:
+				self.index_open = not self.index_open
+				self.player.blocked = not self.player.blocked
+
 	def create_dialog(self, character):
 		if not self.dialog_tree:
 			self.dialog_tree = DialogTree(character, self.player, self.all_sprites, self.fonts['dialog'], self.end_dialog)
@@ -156,7 +185,6 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0,0))
 
-
 	def run(self):
 		while True:
 			dt = self.clock.tick() / 1000
@@ -178,6 +206,7 @@ class Game:
 
 			# Overlays
 			if self.dialog_tree: self.dialog_tree.update()
+			if self.index_open: self.monster_index.update(dt)
 
 			self.tint_screen(dt)
 			pygame.display.update()
