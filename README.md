@@ -14,3 +14,8 @@ To run this project you need:
 - **Python 3.7+**
 - **Pygame-ce** (installable via `pip`)
 - **Tiled** (to view or edit maps, optional)
+
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/TristanDeschamp/PythonMonsters.git
