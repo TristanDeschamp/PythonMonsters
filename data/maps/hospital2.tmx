@@ -43,7 +43,7 @@
    </properties>
    <point/>
   </object>
-  <object id="12" name="Character" x="286.934" y="374.101">
+  <object id="12" name="Character" x="286.934" y="436.194">
    <properties>
     <property name="character_id" value="Nurse"/>
     <property name="direction" value="down"/>

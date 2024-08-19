@@ -7,7 +7,7 @@ from support import draw_bar
 from random import choice
 
 class Battle:
-	def __init__(self, player_monsters, opponent_monsters, monster_frames, bg_surf, fonts):
+	def __init__(self, player_monsters, opponent_monsters, monster_frames, bg_surf, fonts, end_battle, character, sounds):
 		# General
 		self.display_surface = pygame.display.get_surface()
 		self.bg_surf = bg_surf
@@ -15,6 +15,9 @@ class Battle:
 		self.fonts = fonts
 		self.monster_data = {'player': player_monsters, 'opponent': opponent_monsters}
 		self.battle_over = False
+		self.end_battle = end_battle
+		self.character = character
+		self.sounds = sounds
 
 		self.timers = {
 			'opponent delay': Timer(600, func = self.opponent_attack)
@@ -50,6 +53,7 @@ class Battle:
 				del self.monster_data['opponent'][i]
 
 	def create_monster(self, monster, index, pos_index, entity):
+		monster.paused = False
 		frames = self.monster_frames['monsters'][monster.name]
 		outline_frames = self.monster_frames['outlines'][monster.name]
 		if entity == 'player':
@@ -161,6 +165,7 @@ class Battle:
 
 	def apply_attack(self, target_sprite, attack, amount):
 		AttackSprite(target_sprite.rect.center, self.monster_frames['attacks'][ATTACK_DATA[attack]['animation']], self.battle_sprites)
+		self.sounds[ATTACK_DATA[attack]['animation']].play()
 
 		# Get Correct Attack Damage Amount (defense, element)
 		attack_element = ATTACK_DATA[attack]['element']
@@ -220,7 +225,7 @@ class Battle:
 		# Opponent Defeated
 		if len(self.opponent_sprites) == 0 and not self.battle_over:
 			self.battle_over = True
-			print('battle won')
+			self.end_battle(self.character)
 			for monster in self.monster_data['player'].values():
 				monster.initiative = 0
 
